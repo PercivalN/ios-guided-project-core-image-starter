@@ -4,6 +4,16 @@ import Photos
 
 class PhotoFilterViewController: UIViewController {
 
+
+	var originialImage: UIImage? {
+		didSet {
+
+		}
+	}
+
+	private var filter = CIFilter(name: "CIColorControls")!
+	private var context = CIContext(options: nil)
+
 	@IBOutlet var brightnessSlider: UISlider!
 	@IBOutlet var contrastSlider: UISlider!
 	@IBOutlet var saturationSlider: UISlider!
@@ -12,6 +22,14 @@ class PhotoFilterViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+		originialImage = imageView.image
+	}
+
+	// MARK: Helper Methods
+	private func filterImage(_ image: UIImage) -> UIImage {
+
+		return image // TODO: return the filtered image
+		
 	}
 	
 	// MARK: Actions
