@@ -7,7 +7,19 @@ class PhotoFilterViewController: UIViewController {
 
 	var originalImage: UIImage? {
 		didSet {
-			print("update the UI!")
+			guard let originalImage = originalImage else { return }
+			// Height and width
+			var scaledSize = imageView.bounds.size
+			// 1x, 2x, or 3x
+			let scale = UIScreen.main.scale
+			scaledSize = CGSize(width: scaledSize.width * scale, height: scaledSize.height * scale)
+			print("size: \(scaledSize)")
+			scaledImage = originalImage.imageByScaling(toSize: scaledSize)
+		}
+	}
+
+	var scaledImage: UIImage? {
+		didSet {
 			updateImage()
 		}
 	}
@@ -69,8 +81,24 @@ class PhotoFilterViewController: UIViewController {
 	}
 	
 	@IBAction func savePhotoButtonPressed(_ sender: UIButton) {
-
-		// TODO: Save to photo library
+		guard let originalImage = originalImage else { return }
+		let processedImage = filterImage(originalImage.flattened)
+		PHPhotoLibrary.requestAuthorization { (status) in
+			guard status == .authorized else { return }
+			// Let the library know we are going to make changes
+			PHPhotoLibrary.shared().performChanges({
+				// Make a new photo creation request
+				PHAssetCreationRequest.creationRequestForAsset(from: processedImage)
+			}, completionHandler: { (success, error) in
+				if let error = error {
+					NSLog("Error saving photo: \(error)")
+					return
+				}
+				DispatchQueue.main.async {
+					print("Saved image!")
+				}
+			})
+		}
 	}
 	
 
@@ -91,8 +119,8 @@ class PhotoFilterViewController: UIViewController {
 	}
 
 	private func updateImage() {
-		if let originalImage = originalImage {
-			imageView.image = filterImage(originalImage)
+		if let scaledImage = scaledImage {
+			imageView.image = filterImage(scaledImage)
 		} else {
 			imageView.image = nil
 		}
