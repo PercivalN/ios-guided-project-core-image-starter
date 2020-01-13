@@ -5,7 +5,7 @@ import Photos
 class PhotoFilterViewController: UIViewController {
 
 
-	var originialImage: UIImage? {
+	var originalImage: UIImage? {
 		didSet {
 
 		}
@@ -22,7 +22,7 @@ class PhotoFilterViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
-		originialImage = imageView.image
+		originalImage = imageView.image
 	}
 
 	// MARK: Helper Methods
@@ -45,7 +45,6 @@ class PhotoFilterViewController: UIViewController {
 		guard let outputCGImage = context.createCGImage(outputCIImage, from: CGRect(origin: CGPoint.zero, size: image.size)) else { return image }
 
 		return UIImage(cgImage: outputCGImage)
-
 	}
 	
 	// MARK: Actions
@@ -64,7 +63,9 @@ class PhotoFilterViewController: UIViewController {
 	// MARK: Slider events
 	
 	@IBAction func brightnessChanged(_ sender: UISlider) {
-
+		if let originalImage = originalImage {
+		imageView.image = filterImage(originalImage)
+	}
 	}
 	
 	@IBAction func contrastChanged(_ sender: Any) {
@@ -73,6 +74,14 @@ class PhotoFilterViewController: UIViewController {
 	
 	@IBAction func saturationChanged(_ sender: Any) {
 
+	}
+
+	private func updateImage() {
+		if let originalImage = originalImage {
+			imageView.image = filterImage(originalImage)
+		} else {
+			imageView.image = nil
+		}
 	}
 }
 
