@@ -2,6 +2,11 @@ import UIKit
 import CoreImage
 import Photos
 
+//enum SelectedIndex: Int {
+//	case colorControls
+//	case vignette
+//}
+
 class PhotoFilterViewController: UIViewController {
 
 
@@ -27,9 +32,9 @@ class PhotoFilterViewController: UIViewController {
 	private var filter = CIFilter(name: "CIColorControls")!
 	private var context = CIContext(options: nil)
 
-	@IBOutlet var brightnessSlider: UISlider!
-	@IBOutlet var contrastSlider: UISlider!
-	@IBOutlet var saturationSlider: UISlider!
+	@IBOutlet var topSlider: UISlider!
+	@IBOutlet var middleSlider: UISlider!
+	@IBOutlet var bottomSlider: UISlider!
 	@IBOutlet var imageView: UIImageView!
 	
 	override func viewDidLoad() {
@@ -49,9 +54,8 @@ class PhotoFilterViewController: UIViewController {
 
 		// k = constant
 		filter.setValue(ciImage, forKey: kCIInputImageKey) // "inputImage"
-		filter.setValue(brightnessSlider.value, forKey: kCIInputBrightnessKey)
-		filter.setValue(contrastSlider.value, forKey: kCIInputContrastKey)
-		filter.setValue(saturationSlider.value, forKey: kCIInputSaturationKey)
+
+		setFilter()
 
 		guard let outputCIImage = filter.outputImage else { return image }
 
@@ -79,7 +83,72 @@ class PhotoFilterViewController: UIViewController {
 
 		present(imagePicker, animated: true, completion: nil)
 	}
-	
+
+	private func setFilter() {
+		switch filter.name {
+		case "CIVignette": setVignette()
+			
+		default: setColorControls()
+		}
+	}
+
+
+	private func setColorControls() {
+
+		filter.setValue(topSlider.value, forKey: kCIInputBrightnessKey)
+		filter.setValue(middleSlider.value, forKey: kCIInputContrastKey)
+		filter.setValue(bottomSlider.value, forKey: kCIInputSaturationKey)
+	}
+
+	private func setVignette() {
+
+		filter.setValue(topSlider.value, forKey: kCIInputIntensityKey)
+		filter.setValue(middleSlider.value, forKey: kCIInputRadiusKey)
+		bottomSlider.isHidden = true
+	}
+
+	@IBAction func SegmentedControlChange(_ sender: UISegmentedControl) {
+		switch sender.selectedSegmentIndex {
+		case 0: filter = CIFilter(name: "CIColorControls")!
+			setColorControlSliderValues()
+		case 1: filter = CIFilter(name: "CIVignette")!
+			set
+		case 2: return
+		case 3: return
+		default: return
+
+		}
+	}
+
+	private func setColorControlSliderValues() {
+		topSlider.isHidden = false
+		middleSlider.isHidden = false
+		bottomSlider.isHidden = false
+
+		topSlider.value = 0
+		topSlider.minimumValue = -1
+		topSlider.maximumValue = 1
+
+		middleSlider.value = 0
+		middleSlider.minimumValue = 0.25
+		middleSlider.maximumValue = 4
+
+		bottomSlider.value = 0
+		bottomSlider.minimumValue = 0.25
+		bottomSlider.maximumValue = 4
+	}
+
+	private func setVignetteSliderValues() {
+
+        topSlider.value = 0
+        topSlider.minimumValue = -1
+        topSlider.maximumValue = 1
+        middleSlider.value =  1
+        middleSlider.minimumValue = 0
+        middleSlider.maximumValue = 2
+    }
+
+
 	@IBAction func savePhotoButtonPressed(_ sender: UIButton) {
 		guard let originalImage = originalImage else { return }
 		let processedImage = filterImage(originalImage.flattened)
